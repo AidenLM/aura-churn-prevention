@@ -52,6 +52,84 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+@app.post("/predict-all-customers")
+async def predict_all_customers():
+    """Run ML predictions for all customers in database"""
+    from sqlalchemy.orm import Session
+    from app.db.models import Customer
+    from app.services.churn_predictor import ChurnPredictor
+    from app.repositories.customer_repository import CustomerRepository
+    
+    db = Session(bind=engine)
+    try:
+        predictor = ChurnPredictor()
+        repo = CustomerRepository(db)
+        
+        # Get all customers
+        customers = db.query(Customer).all()
+        total = len(customers)
+        
+        if total == 0:
+            return {"message": "No customers in database", "predicted": 0}
+        
+        success_count = 0
+        error_count = 0
+        
+        for customer in customers:
+            try:
+                # Prepare customer data
+                customer_data = {
+                    "customer_id": customer.customer_id,
+                    "gender": customer.gender,
+                    "senior_citizen": customer.senior_citizen,
+                    "partner": customer.partner,
+                    "dependents": customer.dependents,
+                    "tenure": customer.tenure,
+                    "contract": customer.contract,
+                    "paperless_billing": customer.paperless_billing,
+                    "payment_method": customer.payment_method,
+                    "monthly_charges": float(customer.monthly_charges),
+                    "total_charges": float(customer.total_charges),
+                    "phone_service": customer.phone_service,
+                    "multiple_lines": customer.multiple_lines,
+                    "internet_service": customer.internet_service,
+                    "online_security": customer.online_security,
+                    "online_backup": customer.online_backup,
+                    "device_protection": customer.device_protection,
+                    "tech_support": customer.tech_support,
+                    "streaming_tv": customer.streaming_tv,
+                    "streaming_movies": customer.streaming_movies
+                }
+                
+                # Get ML prediction
+                prediction = predictor.predict(customer_data)
+                
+                # Save to database (overwrites existing)
+                repo.save_prediction(
+                    customer_id=customer.customer_id,
+                    risk_score=prediction["churn_probability"],
+                    risk_level=prediction["risk_level"]
+                )
+                
+                success_count += 1
+                    
+            except Exception as e:
+                error_count += 1
+                print(f"Error for customer {customer.customer_id}: {e}")
+        
+        return {
+            "message": "Predictions complete",
+            "total": total,
+            "success": success_count,
+            "errors": error_count
+        }
+        
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e), "predicted": 0}
+    finally:
+        db.close()
+
 @app.post("/seed-database")
 async def seed_database():
     """Manually seed the database with sample data"""
