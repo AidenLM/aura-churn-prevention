@@ -27,21 +27,31 @@ class ChurnPredictor:
     def _load_model(self):
         """Load the trained model, scaler, and feature names"""
         try:
+            # Get absolute path relative to this file
+            import os
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            model_dir = os.path.join(base_dir, "models")
+            
             # Load model
-            with open(f"{self.model_path}/best_model.pkl", "rb") as f:
+            model_file = os.path.join(model_dir, "best_model.pkl")
+            print(f"Loading model from: {model_file}")
+            with open(model_file, "rb") as f:
                 self.model = pickle.load(f)
             
             # Load scaler
-            with open(f"{self.model_path}/scaler.pkl", "rb") as f:
+            scaler_file = os.path.join(model_dir, "scaler.pkl")
+            with open(scaler_file, "rb") as f:
                 self.scaler = pickle.load(f)
             
             # Load feature names
-            with open(f"{self.model_path}/feature_names.pkl", "rb") as f:
+            features_file = os.path.join(model_dir, "feature_names.pkl")
+            with open(features_file, "rb") as f:
                 self.feature_names = pickle.load(f)
             
             # Load metadata
             import json
-            with open(f"{self.model_path}/model_metadata.json", "r") as f:
+            metadata_file = os.path.join(model_dir, "model_metadata.json")
+            with open(metadata_file, "r") as f:
                 self.metadata = json.load(f)
             
             print(f"✅ Model loaded: {self.metadata['model_name']}")
