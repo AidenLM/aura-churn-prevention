@@ -18,10 +18,17 @@ async def startup_event():
     Base.metadata.create_all(bind=engine)
     print("✅ Database tables created")
 
-# CORS middleware
+# CORS middleware - Allow production and development origins
+allowed_origins = [
+    settings.FRONTEND_URL,
+    "https://nativestruct.com",
+    "https://www.nativestruct.com",
+    "http://localhost:3000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -60,39 +67,47 @@ async def seed_database():
         if count > 0:
             return {"message": f"Database already has {count} customers", "seeded": False}
         
-        # Create 50 sample customers (simplified - no predictions for now)
-        FIRST_NAMES = ["Ahmet", "Mehmet", "Mustafa", "Ali", "Ayşe", "Fatma", "Zeynep"]
-        LAST_NAMES = ["Yılmaz", "Kaya", "Demir", "Şahin", "Öztürk"]
-        PLAN_TYPES = ["Standart", "Premium", "Ekonomik"]
+        # Create 50 sample customers using TrustedModel schema
+        GENDERS = ["Male", "Female"]
+        YES_NO = ["Yes", "No"]
+        CONTRACTS = ["Month-to-month", "One year", "Two year"]
+        PAYMENT_METHODS = ["Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"]
+        INTERNET_SERVICES = ["DSL", "Fiber optic", "No"]
+        INTERNET_OPTIONS = ["Yes", "No", "No internet service"]
+        PHONE_OPTIONS = ["Yes", "No", "No phone service"]
         
         for i in range(50):
-            name = f"{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}"
             tenure = random.randint(1, 72)
-            monthly_charge = round(random.uniform(100, 400), 2)
+            monthly_charges = round(random.uniform(20, 120), 2)
+            total_charges = round(monthly_charges * tenure, 2)
             risk_score = random.uniform(0, 1)
             
             customer = Customer(
                 customer_id=f"C{10000 + i}",
-                name=name,
-                email=f"customer{i}@example.com",
-                phone=f"+90 5{random.randint(10, 59)} {random.randint(100, 999)} {random.randint(10, 99)} {random.randint(10, 99)}",
-                plan_type=random.choice(PLAN_TYPES),
-                tenure_months=tenure,
-                monthly_charge=monthly_charge,
-                age=random.randint(18, 75),
-                gender=random.randint(0, 1),
-                data_usage_gb=round(random.uniform(1, 50), 1),
-                voice_minutes=random.randint(0, 1500),
-                sms_count=random.randint(0, 500),
-                complaint_count=random.randint(0, 5),
-                call_failures=random.randint(0, 20),
-                support_calls_count=random.randint(0, 10),
-                payment_delays=random.randint(0, 3),
-                contract_type=random.choice(["Monthly", "Annual"])
+                gender=random.choice(GENDERS),
+                senior_citizen=random.randint(0, 1),
+                partner=random.choice(YES_NO),
+                dependents=random.choice(YES_NO),
+                tenure=tenure,
+                contract=random.choice(CONTRACTS),
+                paperless_billing=random.choice(YES_NO),
+                payment_method=random.choice(PAYMENT_METHODS),
+                monthly_charges=monthly_charges,
+                total_charges=total_charges,
+                phone_service=random.choice(YES_NO),
+                multiple_lines=random.choice(PHONE_OPTIONS),
+                internet_service=random.choice(INTERNET_SERVICES),
+                online_security=random.choice(INTERNET_OPTIONS),
+                online_backup=random.choice(INTERNET_OPTIONS),
+                device_protection=random.choice(INTERNET_OPTIONS),
+                tech_support=random.choice(INTERNET_OPTIONS),
+                streaming_tv=random.choice(INTERNET_OPTIONS),
+                streaming_movies=random.choice(INTERNET_OPTIONS),
+                churn="No"
             )
             db.add(customer)
             
-            # Create simple prediction record
+            # Create prediction record
             if risk_score >= 0.7:
                 risk_level = "high"
             elif risk_score >= 0.4:
@@ -102,9 +117,11 @@ async def seed_database():
                 
             pred_record = PredictionRecord(
                 customer_id=customer.customer_id,
+                churn_probability=risk_score,
                 risk_score=risk_score,
                 risk_level=risk_level,
-                shap_values={},
+                predicted_churn="Yes" if risk_score >= 0.5 else "No",
+                model_name="Voting Classifier",
                 timestamp=datetime.utcnow()
             )
             db.add(pred_record)
