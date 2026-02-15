@@ -27,11 +27,9 @@ class ChurnPredictor:
     def _load_model(self):
         """Load the trained model, scaler, and feature names"""
         try:
-            # Get absolute path relative to this file
-            import os
+            # Use the model_path set in __init__
+            model_dir = self.model_path
             
-            # This file is at: aura-backend/app/services/churn_predictor.py
-            # We nee
             # Load model
             model_file = os.path.join(model_dir, "best_model.pkl")
             print(f"Loading model from: {model_file}")
