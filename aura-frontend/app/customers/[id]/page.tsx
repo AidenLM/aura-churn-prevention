@@ -3,6 +3,10 @@ import Link from 'next/link';
 import { TooltipProvider, Tooltip } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 
+// Enable dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const customer = await getCustomerById(id);
