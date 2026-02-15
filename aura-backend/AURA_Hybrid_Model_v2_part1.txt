@@ -1,0 +1,70 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# 🚀 AURA HYBRID MODEL V2 - HIGH RECALL\n",
+    "## Maven Analytics + Iranian Churn\n",
+    "\n",
+    "### 🎯 Class Imbalance Çözümü ile Yüksek Recall!\n",
+    "\n",
+    "**Önceki Problem:**\n",
+    "- Recall: %17.76 ❌ (churn edenlerin %83'ünü kaçırıyordu)\n",
+    "- ROC-AUC: %70.51 ❌\n",
+    "\n",
+    "**Yeni Hedef:**\n",
+    "- Recall: %60+ ✅\n",
+    "- ROC-AUC: %80+ ✅\n",
+    "- Accuracy: %80+ ✅\n",
+    "\n",
+    "**Çözümler:**\n",
+    "1. scale_pos_weight (class imbalance için)\n",
+    "2. Threshold optimization (0.5 → 0.3)\n",
+    "3. ROC-AUC optimization\n",
+    "4. Feature importance analysis"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 📦 1. Kütüphaneleri Yükle"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!pip install -q xgboost scikit-learn pandas numpy shap openpyxl matplotlib seaborn\n",
+    "\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import pickle\n",
+    "import json\n",
+    "import zipfile\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import LabelEncoder, StandardScaler\n",
+    "from sklearn.metrics import (\n",
+    "    accuracy_score, precision_score, recall_score, f1_score, \n",
+    "    roc_auc_score, confusion_matrix, classification_report, roc_curve\n",
+    ")\n",
+    "import xgboost as xgb\n",
+    "import shap\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import warnings\n",
+    "warnings.filterwarnings('ignore')\n",
+    "\n",
+    "print('=' * 80)\n",
+    "print('🎯 AURA HYBRID MODEL V2 - HIGH RECALL')\n",
+    "print('=' * 80)\n",
+    "print('\\n✅ Kütüphaneler yüklendi!')"
+   ]
+  }
+ ],
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
