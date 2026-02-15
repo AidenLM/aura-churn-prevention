@@ -29,9 +29,9 @@ class ChurnPredictor:
         try:
             # Get absolute path relative to this file
             import os
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            model_dir = os.path.join(base_dir, "models")
             
+            # This file is at: aura-backend/app/services/churn_predictor.py
+            # We nee
             # Load model
             model_file = os.path.join(model_dir, "best_model.pkl")
             print(f"Loading model from: {model_file}")
