@@ -56,13 +56,13 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             <div className="bg-white rounded-lg border border-gray-200 p-8 shadow-sm">
               <div className="flex items-start gap-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#0052CC] to-[#0065FF] rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-2xl font-bold">{customer.name.charAt(0)}</span>
+                  <span className="text-white text-2xl font-bold">{customer.customer_id.charAt(0)}</span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h2 className="text-[#172B4D] text-2xl font-bold mb-1">{customer.name}</h2>
-                      <p className="text-[#5E6C84] text-sm">{customer.customer_id}</p>
+                      <h2 className="text-[#172B4D] text-2xl font-bold mb-1">Müşteri {customer.customer_id}</h2>
+                      <p className="text-[#5E6C84] text-sm">ID: {customer.customer_id}</p>
                     </div>
                     <span className={`px-4 py-2 rounded-lg ${riskColors.bg} ${riskColors.text} border ${riskColors.border} text-sm font-semibold`}>
                       {customer.risk_level} Risk
@@ -70,12 +70,12 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-[#5E6C84] text-xs mb-1">Email</p>
-                      <p className="text-[#172B4D] text-sm font-medium">{customer.email}</p>
+                      <p className="text-[#5E6C84] text-xs mb-1">Sözleşme Tipi</p>
+                      <p className="text-[#172B4D] text-sm font-medium">{customer.contract_type}</p>
                     </div>
                     <div>
-                      <p className="text-[#5E6C84] text-xs mb-1">Telefon</p>
-                      <p className="text-[#172B4D] text-sm font-medium">{customer.phone}</p>
+                      <p className="text-[#5E6C84] text-xs mb-1">İnternet Hizmeti</p>
+                      <p className="text-[#172B4D] text-sm font-medium">{customer.plan_type}</p>
                     </div>
                   </div>
                 </div>
@@ -213,14 +213,25 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   // Map feature names to actual values
                   const getActualValue = (featureName: string) => {
                     switch(featureName) {
-                      case 'complaint_count': return `${customer.complaint_count} şikayet`;
-                      case 'payment_delays': return `${customer.payment_delays} gecikme`;
-                      case 'support_calls_count': return `${customer.support_calls_count} arama`;
-                      case 'data_usage_gb': return `${customer.data_usage_gb.toFixed(1)} GB`;
-                      case 'voice_minutes': return `${customer.voice_minutes} dk`;
                       case 'tenure': return `${customer.tenure} ay`;
-                      case 'contract_type': return customer.contract_type;
-                      case 'monthly_charge': return formatCurrency(customer.monthly_charge);
+                      case 'contract': return customer.contract_type;
+                      case 'monthly_charges': return formatCurrency(customer.monthly_charge);
+                      case 'total_charges': return formatCurrency(customer.monthly_charge * customer.tenure);
+                      case 'payment_method': return customer.contract_type;
+                      case 'internet_service': return customer.plan_type;
+                      case 'tech_support': return '';
+                      case 'online_security': return '';
+                      case 'online_backup': return '';
+                      case 'device_protection': return '';
+                      case 'streaming_tv': return '';
+                      case 'streaming_movies': return '';
+                      case 'paperless_billing': return '';
+                      case 'family_status': return '';
+                      case 'senior_citizen': return '';
+                      case 'phone_service': return '';
+                      case 'multiple_lines': return '';
+                      case 'gender': return '';
+                      case 'partner': return '';
                       default: return '';
                     }
                   };
