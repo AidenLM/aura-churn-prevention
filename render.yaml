@@ -1,0 +1,29 @@
+services:
+  # Backend API Service
+  - type: web
+    name: aura-backend
+    runtime: python
+    region: frankfurt
+    plan: free
+    branch: main
+    rootDir: aura-backend
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      chmod +x render_start.sh
+    startCommand: ./render_start.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: DATABASE_URL
+        value: sqlite:///./aura_dev.db
+      - key: CORS_ORIGINS
+        value: https://aura-frontend.vercel.app,https://nativestruct.com,https://www.nativestruct.com
+      - key: ENVIRONMENT
+        value: production
+    disk:
+      name: aura-data
+      mountPath: /opt/render/project/src/aura-backend/data
+      sizeGB: 1
+    healthCheckPath: /health
+    autoDeploy: true

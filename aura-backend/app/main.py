@@ -120,10 +120,10 @@ async def load_csv_data():
         db.close()
 
 @app.post("/predict-all-customers")
-async def predict_all_customers():
-    """Run ML predictions for all customers in database"""
+async def predict_all_customers(batch_size: int = 100):
+    """Run ML predictions for all customers in database (in batches to avoid timeout)"""
     from sqlalchemy.orm import Session
-    from app.db.models import Customer
+    from app.db.models import Customer, PredictionRecord
     from app.services.churn_predictor import ChurnPredictor
     from app.repositories.customer_repository import CustomerRepository
     
@@ -132,12 +132,26 @@ async def predict_all_customers():
         predictor = ChurnPredictor()
         repo = CustomerRepository(db)
         
-        # Get all customers
-        customers = db.query(Customer).all()
+        # Get customers without predictions
+        customers_with_predictions = db.query(PredictionRecord.customer_id).distinct().all()
+        predicted_ids = [c[0] for c in customers_with_predictions]
+        
+        customers = db.query(Customer).filter(
+            ~Customer.customer_id.in_(predicted_ids)
+        ).limit(batch_size).all()
+        
         total = len(customers)
         
         if total == 0:
-            return {"message": "No customers in database", "predicted": 0}
+            # Check total customers
+            all_customers = db.query(Customer).count()
+            all_predictions = db.query(PredictionRecord).distinct(PredictionRecord.customer_id).count()
+            return {
+                "message": "All customers already have predictions",
+                "total_customers": all_customers,
+                "total_predictions": all_predictions,
+                "predicted": 0
+            }
         
         success_count = 0
         error_count = 0
@@ -184,11 +198,20 @@ async def predict_all_customers():
                 error_count += 1
                 print(f"Error for customer {customer.customer_id}: {e}")
         
+        # Check remaining
+        remaining = db.query(Customer).filter(
+            ~Customer.customer_id.in_(
+                db.query(PredictionRecord.customer_id).distinct()
+            )
+        ).count()
+        
         return {
-            "message": "Predictions complete",
-            "total": total,
+            "message": f"Batch predictions complete",
+            "batch_size": total,
             "success": success_count,
-            "errors": error_count
+            "errors": error_count,
+            "remaining": remaining,
+            "call_again": remaining > 0
         }
         
     except Exception as e:
