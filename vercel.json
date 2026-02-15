@@ -1,6 +1,15 @@
 {
-  "buildCommand": "cd aura-frontend && npm install && npm run build",
-  "outputDirectory": "aura-frontend/.next",
-  "framework": "nextjs",
-  "installCommand": "cd aura-frontend && npm install"
+  "version": 2,
+  "builds": [
+    {
+      "src": "aura-frontend/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "aura-frontend/$1"
+    }
+  ]
 }
