@@ -26,6 +26,9 @@ ENV/
 # Database
 *.db
 *.sqlite
+data/*.db
+data/*.sqlite
+!data/.gitkeep
 
 # Testing
 .pytest_cache/

@@ -3,8 +3,12 @@ from typing import List, Optional
 import os
 
 class Settings(BaseSettings):
-    # Database
-    DATABASE_URL: str = "sqlite:///./aura_dev.db"
+    # Database - Use persistent disk in production
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///./data/aura_dev.db" if os.path.exists("/opt/render/project/src/aura-backend/data") 
+        else "sqlite:///./aura_dev.db"
+    )
     
     # JWT
     SECRET_KEY: str = "default-secret-key-change-in-production"
