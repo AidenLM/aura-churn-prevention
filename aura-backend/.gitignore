@@ -19,8 +19,8 @@ ENV/
 *.swp
 *.swo
 
-# Models
-models/*.pkl
+# Models (commented out for deployment)
+# models/*.pkl
 !models/.gitkeep
 
 # Database
