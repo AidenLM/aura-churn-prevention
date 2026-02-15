@@ -1,7 +1,7 @@
 """Load TrustedModel CSV data into database"""
 import pandas as pd
-from app.db.base import SessionLocal
-from app.db.models import Customer, PredictionRecord, Base, engine
+from app.db.base import SessionLocal, engine, Base
+from app.db.models import Customer, PredictionRecord
 from datetime import datetime
 import random
 
