@@ -52,6 +52,71 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+@app.post("/load-csv-data")
+async def load_csv_data():
+    """Load all 7043 customers from TrustedModel CSV"""
+    from sqlalchemy.orm import Session
+    from app.db.models import Customer, PredictionRecord
+    import pandas as pd
+    import os
+    from datetime import datetime
+    
+    db = Session(bind=engine)
+    try:
+        # Check if already loaded
+        count = db.query(Customer).count()
+        if count >= 7000:
+            return {"message": f"Database already has {count} customers", "loaded": False}
+        
+        # Get CSV path
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        csv_path = os.path.join(base_dir, "aura-backend", "TrustedModel", "WA_Fn-UseC_-Telco-Customer-Churn.csv")
+        
+        # Read CSV
+        df = pd.read_csv(csv_path)
+        
+        # Clean data
+        df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+        df['TotalCharges'].fillna(0, inplace=True)
+        
+        loaded_count = 0
+        
+        for _, row in df.iterrows():
+            customer = Customer(
+                customer_id=row['customerID'],
+                gender=row['gender'],
+                senior_citizen=int(row['SeniorCitizen']),
+                partner=row['Partner'],
+                dependents=row['Dependents'],
+                tenure=int(row['tenure']),
+                phone_service=row['PhoneService'],
+                multiple_lines=row['MultipleLines'],
+                internet_service=row['InternetService'],
+                online_security=row['OnlineSecurity'],
+                online_backup=row['OnlineBackup'],
+                device_protection=row['DeviceProtection'],
+                tech_support=row['TechSupport'],
+                streaming_tv=row['StreamingTV'],
+                streaming_movies=row['StreamingMovies'],
+                contract=row['Contract'],
+                paperless_billing=row['PaperlessBilling'],
+                payment_method=row['PaymentMethod'],
+                monthly_charges=float(row['MonthlyCharges']),
+                total_charges=float(row['TotalCharges']),
+                churn=row['Churn']
+            )
+            db.add(customer)
+            loaded_count += 1
+        
+        db.commit()
+        return {"message": f"Loaded {loaded_count} customers from CSV", "loaded": True, "count": loaded_count}
+        
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e), "loaded": False}
+    finally:
+        db.close()
+
 @app.post("/predict-all-customers")
 async def predict_all_customers():
     """Run ML predictions for all customers in database"""
