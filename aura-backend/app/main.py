@@ -68,9 +68,11 @@ async def load_csv_data():
         if count >= 7000:
             return {"message": f"Database already has {count} customers", "loaded": False}
         
-        # Get CSV path
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        csv_path = os.path.join(base_dir, "aura-backend", "TrustedModel", "WA_Fn-UseC_-Telco-Customer-Churn.csv")
+        # Get CSV path - Fix for Render deployment
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        # Go up from app/main.py to aura-backend/
+        backend_dir = os.path.dirname(base_dir)
+        csv_path = os.path.join(backend_dir, "TrustedModel", "WA_Fn-UseC_-Telco-Customer-Churn.csv")
         
         # Read CSV
         df = pd.read_csv(csv_path)
